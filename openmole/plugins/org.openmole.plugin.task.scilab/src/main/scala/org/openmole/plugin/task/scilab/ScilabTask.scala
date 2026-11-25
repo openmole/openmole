@@ -34,7 +34,9 @@ object ScilabTask:
     stdErr:                 OptionalArgument[Val[String]]       = None,
     environmentVariables:   Seq[EnvironmentVariable]            = Vector.empty,
     hostFiles:              Seq[HostFile]                       = Vector.empty,
-    containerSystem:        OptionalArgument[ContainerSystem]   = None)(using sourcecode.Name, DefinitionScope) =
+    containerSystem:        OptionalArgument[ContainerSystem]   = None,
+    clearContainerCache:             Boolean                            = false,
+    looseInstallCache:      Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
     ExternalTask.build("ScilabTask"): buildParameters =>
       import buildParameters.*
@@ -45,7 +47,9 @@ object ScilabTask:
           containerSystem,
           scilabImage(version),
           install,
-          buildParameters = buildParameters
+          buildParameters = buildParameters,
+          clearContainerCache = clearContainerCache,
+          looseInstallCache = looseInstallCache
         )
 
       def workDirectory = "/_workdirectory_"

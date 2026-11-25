@@ -41,8 +41,9 @@ ${ul(
    li{html"${code{"version"}} String, $optional. The version of Python to run."},
    li{html"${code{"install"}} Sequence of strings, $optional (default = empty). The commands to be executed prior to any Python packages installation and script execution (to install libraries on the system)."},
    li{html"${code{"libraries"}} Sequence of strings, $optional (default = empty). The name of Python libraries (through pip) that will be used by the script and need to be installed before (note: as detailed below, installations are only achieved during the first execution of the script, and then stored in a docker image in cache. To force an update, use the ${i{"forceUpdate"}} argument)."},
-   li{html"${code{"forceUpdate"}} Boolean, $optional (default = false). Should the libraries installation be forced (to ensure an update for example). If true, the task will perform the installation (and thus the update) even if the library was already installed."},
    li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before to the execution of Python on the execution node."},
+   Native.containerCache,
+   Native.looseInstallCache
 )}
 
 

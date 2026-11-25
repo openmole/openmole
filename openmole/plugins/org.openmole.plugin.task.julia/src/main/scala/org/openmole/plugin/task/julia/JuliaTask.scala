@@ -75,7 +75,8 @@ object JuliaTask:
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
     containerSystem:        OptionalArgument[ContainerSystem]  = None,
-    clearCache:             Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
+    clearContainerCache:             Boolean                            = false,
+    looseInstallCache:      Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
   ContainerTask.build("JuliaTask"): buildParameters =>
     import buildParameters.*
@@ -89,7 +90,8 @@ object JuliaTask:
         volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries),
         environmentVariables = Library.variables(precompileCPUTarget),
         buildParameters = buildParameters,
-        clearCache = clearCache)
+        clearContainerCache = clearContainerCache,
+        looseInstallCache = looseInstallCache)
 
     def workDirectory = "/_workdirectory_"
     def scriptName = s"$workDirectory/_generatescript_.jl"

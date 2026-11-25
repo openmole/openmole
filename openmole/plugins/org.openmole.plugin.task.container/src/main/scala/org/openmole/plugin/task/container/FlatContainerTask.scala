@@ -47,7 +47,8 @@ object FlatContainerTask:
     environmentVariables: Seq[(String, String)],
     buildParameters: ExternalTask.BuildParameters,
     errorDetail: Int => Option[String] = _ => None,
-    clearCache: Boolean = false)(using tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService, eventDispatcher: EventDispatcher) =
+    clearContainerCache: Boolean = false,
+    looseInstallCache: Boolean = false)(using tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService, eventDispatcher: EventDispatcher) =
     import org.openmole.tool.hash._
 
     def cacheId(image: ContainerImage): Seq[String] =
@@ -55,8 +56,15 @@ object FlatContainerTask:
         case image: DockerImage      => Seq(image.image, image.tag, image.registry)
         case image: SavedDockerImage => Seq(Hash.file(image.file).toString)
 
-    val volumeCacheKey = volumes.map { (f, _) => fileService.hashNoCache(f).toString } ++ volumes.map { (_, d) => d }
-    val cacheKey: String = Hash.string((cacheId(image) ++ install ++ volumeCacheKey ++ "flat").mkString("\n")).toString
+    val cacheKey: String =
+      if !looseInstallCache
+      then
+        val volumeCacheKey = volumes.map((f, _) => FileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
+        (cacheId(image) ++ install ++ volumeCacheKey ++ Seq("flat")).mkString("\n")
+      else
+        (cacheId(image) ++ install ++ Seq("flat")).mkString("\n")
+
+
     val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedFlatImage = cacheDirectory / "flatimage.bin"
 
@@ -64,7 +72,7 @@ object FlatContainerTask:
       cacheDirectory.withLockInDirectory:
         val containerDirectory = cacheDirectory / "fs"
 
-        if clearCache
+        if clearContainerCache
         then
           serializedFlatImage.delete
           containerDirectory.recursiveDelete
@@ -72,7 +80,7 @@ object FlatContainerTask:
         if serializedFlatImage.exists
         then serializerService.deserialize[_root_.container.FlatImage](serializedFlatImage)
         else
-          val img = ContainerTask.localImage(image, containerDirectory, clearCache = clearCache, buildParameters = buildParameters)
+          val img = ContainerTask.localImage(image, containerDirectory, clearContainerCache = clearContainerCache, buildParameters = buildParameters)
           val installedImage = ContainerTask.executeInstall(img, install, volumes, environmentVariables, errorDetail = errorDetail)
           serializerService.serialize(installedImage, serializedFlatImage)
           installedImage

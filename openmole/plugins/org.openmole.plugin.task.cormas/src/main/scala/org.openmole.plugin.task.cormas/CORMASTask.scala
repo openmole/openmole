@@ -37,7 +37,7 @@ object CORMASTask:
           cormasImage("elcep/cormas", version),
           buildParameters = buildParameters,
           install = install,
-          clearCache = clearContainerCache)
+          clearContainerCache = clearContainerCache)
 
       def scriptName = "_script_.st"
 

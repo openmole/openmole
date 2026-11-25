@@ -52,6 +52,7 @@ object NetLogoContainerTask:
     hostFiles:              Seq[HostFile]                       = Vector.empty,
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                             = false,
+    looseInstallCache:      Boolean                             = false,
     containerSystem:        OptionalArgument[ContainerSystem]   = None)(using sourcecode.Name, DefinitionScope) =
     val volumesValue = volumes(script, embedWorkspace)
 
@@ -67,7 +68,8 @@ object NetLogoContainerTask:
           install,
           buildParameters = buildParameters,
           volumes = volumesValue.map { (lv, cv) => lv -> cv },
-          clearCache = clearContainerCache)
+          clearContainerCache = clearContainerCache,
+          looseInstallCache = looseInstallCache)
 
       import NetLogoContainerTask.{workspace, netLogoWorkspace}
 

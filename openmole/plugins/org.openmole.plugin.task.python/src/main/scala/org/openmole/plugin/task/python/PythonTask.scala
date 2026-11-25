@@ -51,7 +51,9 @@ object PythonTask:
     returnValue:            OptionalArgument[Val[Int]]         = None,
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
-    containerSystem:        OptionalArgument[ContainerSystem]  = None)(using sourcecode.Name, DefinitionScope) =
+    containerSystem:        OptionalArgument[ContainerSystem]  = None,
+    clearContainerCache:             Boolean                            = false,
+    looseInstallCache:      Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
     ContainerTask.build("PythonTask"): buildParameters =>
       import buildParameters.*
@@ -67,7 +69,9 @@ object PythonTask:
           containerSystem,
           image,
           installCommands(install, libraries, major),
-          buildParameters = buildParameters
+          buildParameters = buildParameters,
+          clearContainerCache = clearContainerCache,
+          looseInstallCache = looseInstallCache
         )
 
       def workDirectory = "/_workdirectory_"
