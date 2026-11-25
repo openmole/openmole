@@ -44,7 +44,7 @@ object PythonTask:
 
         if libraries.isEmpty
         then Vector.empty
-        else Vector(s"u$uvValue ${libraries.mkString(" ")}")
+        else Vector(s"$uvValue ${libraries.mkString(" ")}")
 
   def apply(
     script:                 RunnableScript,
