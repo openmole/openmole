@@ -34,7 +34,9 @@ object PythonTask:
 
     val pipValue = s"""pip$major install --prefer-binary"""
 
-    (effintsall ++ libraries.map(l => s"$pipValue $l")).toVector
+    if libraries.isEmpty
+    then effintsall.toVector
+    else (effintsall ++ Seq(s"$pipValue ${libraries.mkString(" ")}")).toVector
 
   def apply(
     script:                 RunnableScript,
