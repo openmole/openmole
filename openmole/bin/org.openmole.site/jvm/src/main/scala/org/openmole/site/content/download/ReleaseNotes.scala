@@ -41,6 +41,7 @@ ${h2{"V25 | F F"}}
 ${
   notes("""
     - Engine: Implement OMR format version 2
+    - Container: add an option to by pass some container rebuild operations while fixing errors
   """)
 }
 
