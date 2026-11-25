@@ -14,7 +14,6 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.ErrorData.stackTrace
 import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import io.github.nguyenyou.webawesome.laminar.*
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object OMSContent:
@@ -34,12 +33,13 @@ object OMSContent:
           _.cls := "purple",
           _.onClick --> { _ =>
             editor.unsetErrors
-            panels.tabContent.save(tabData, saveUnmodified = true).foreach: saved =>
-              if saved
-              then
-                api.launchScript(safePath).foreach: execID =>
-                  panels.executionPanel.currentOpenSimulation.set(Some(execID))
-                ExecutionPanel.open
+            TabContent.saveAll.foreach: _ =>
+              panels.tabContent.save(tabData, saveUnmodified = true).foreach: saved =>
+                if saved
+                then
+                  api.launchScript(safePath).foreach: execID =>
+                    panels.executionPanel.currentOpenSimulation.set(Some(execID))
+                  ExecutionPanel.open
           })("Run"),
         Button(
           _.appearance.outlined,
@@ -50,16 +50,17 @@ object OMSContent:
             editor.editor.getSession().clearBreakpoints()
             compileDisabled.set(true)
 
-            panels.tabContent.save(tabData, saveUnmodified = true).flatMap: saved =>
-              if saved
-              then
-                api.validateScript(safePath).map: errorDataOption =>
-                  editor.errors.set(errorDataOption)
-                  //setError(safePath, errorDataOption)
-                  editor.editor.focus()
-              else concurrent.Future.successful(())
-            .onComplete: _ =>
-              compileDisabled.set(false)
+            TabContent.saveAll.foreach: _ =>
+              panels.tabContent.save(tabData, saveUnmodified = true).flatMap: saved =>
+                if saved
+                then
+                  api.validateScript(safePath).map: errorDataOption =>
+                    editor.errors.set(errorDataOption)
+                    //setError(safePath, errorDataOption)
+                    editor.editor.focus()
+                else concurrent.Future.successful(())
+              .onComplete: _ =>
+                compileDisabled.set(false)
 
           })("Check"),
         child <--

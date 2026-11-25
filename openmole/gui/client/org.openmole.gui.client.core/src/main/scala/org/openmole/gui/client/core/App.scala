@@ -192,8 +192,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         panels.notifications.render
       )
 
-      def saveAllTabs = panels.tabContent.tabs.now().foreach { t => panels.tabContent.save(t) }
-
       def getServerNotifications =
         if !panels.notifications.isOpened
         then api.listNotification().foreach { n => panels.notifications.addServerNotifications(n) }
@@ -217,9 +215,9 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         div(
           onKeyDown --> { k =>
             if k.keyCode == 83 && k.ctrlKey
-            then saveAllTabs
+            then TabContent.saveAll
           },
-          EventStream.periodic(10000).toObservable --> Observer { _ => saveAllTabs },
+          EventStream.periodic(10000).toObservable --> Observer { _ => TabContent.saveAll },
           EventStream.periodic(10000).toObservable --> Observer { _ => getServerNotifications },
           cls := "app-container",
           theNavBar,

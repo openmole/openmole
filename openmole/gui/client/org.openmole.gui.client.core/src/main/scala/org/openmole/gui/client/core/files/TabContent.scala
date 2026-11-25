@@ -10,9 +10,14 @@ import org.openmole.gui.shared.api.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 import io.github.nguyenyou.webawesome.laminar.*
+import scala.concurrent.Future
 
 object TabContent:
   case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI], controlElement: Option[HtmlElement] = None)
+
+  def saveAll(using panels: Panels, api: ServerAPI, basePath: BasePath) =
+    Future.sequence:
+      panels.tabContent.tabs.now().map { t => panels.tabContent.save(t) }
 
 class TabContent:
 

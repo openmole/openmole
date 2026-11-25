@@ -157,6 +157,7 @@ object RunnableScript:
 sealed trait RunnableScript
 case class RawScript(rawscript: String) extends RunnableScript
 case class FileScript(file: File) extends RunnableScript
+//case class RunScript(path: String, workDirectory: OptinalArgument[String]) extends RunnableScript
 
 object JavaConfiguration:
   def fewerThreadsParameters: Seq[String] = Seq("-XX:+UseSerialGC", "-XX:CICompilerCount=2", "-XX:ConcGCThreads=1", "-XX:-BackgroundCompilation")
