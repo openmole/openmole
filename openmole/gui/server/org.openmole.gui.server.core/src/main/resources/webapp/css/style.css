@@ -502,7 +502,7 @@ li.selectElement {
     font-size: 12px;
     justify-content: flex-end;
     display: flex;
-    margin-right: 10px;
+    margin-right: -15px;
 }
 
 .file3 {

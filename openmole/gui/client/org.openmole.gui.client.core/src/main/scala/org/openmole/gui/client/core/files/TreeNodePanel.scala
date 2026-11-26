@@ -764,6 +764,7 @@ class TreeNodePanel:
                   fontSize.px(20),
                   color := "#fff",
                   marginLeft := "20px",
+                  marginRight := "10px",
                   cursor.pointer)
         ),
         currentLine.signal.map { i => i == id }.expand(toolBox.contentRoot),
