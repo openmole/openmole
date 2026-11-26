@@ -47,22 +47,22 @@ object PythonTask:
         )
 
   def apply(
-             script:                 RunnableScript,
-             arguments:              OptionalArgument[String] = None,
-             image:                  ContainerImage                     = "openmole/python:3.15.2",
-             libraries:              Seq[String]                        = Seq.empty,
-             install:                Seq[String]                        = Seq.empty,
-             prepare:                Seq[String]                        = Seq.empty,
-             hostFiles:              Seq[HostFile]                      = Vector.empty,
-             environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
-             errorOnReturnValue:     Boolean                            = true,
-             executionDirectory:     OptionalArgument[String]           = None,
-             returnValue:            OptionalArgument[Val[Int]]         = None,
-             stdOut:                 OptionalArgument[Val[String]]      = None,
-             stdErr:                 OptionalArgument[Val[String]]      = None,
-             containerSystem:        OptionalArgument[ContainerSystem]  = None,
-             useUV:                  Boolean                            = true,
-             clearContainerCache:    Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
+    script:                 RunnableScript,
+    arguments:              OptionalArgument[String] = None,
+    image:                  ContainerImage                     = "openmole/python:3.15.2",
+    libraries:              Seq[String]                        = Seq.empty,
+    install:                Seq[String]                        = Seq.empty,
+    prepare:                Seq[String]                        = Seq.empty,
+    hostFiles:              Seq[HostFile]                      = Vector.empty,
+    environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
+    errorOnReturnValue:     Boolean                            = true,
+    executionDirectory:     OptionalArgument[String]           = None,
+    returnValue:            OptionalArgument[Val[Int]]         = None,
+    stdOut:                 OptionalArgument[Val[String]]      = None,
+    stdErr:                 OptionalArgument[Val[String]]      = None,
+    containerSystem:        OptionalArgument[ContainerSystem]  = None,
+    useUV:                  Boolean                            = true,
+    clearContainerCache:    Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
     ContainerTask.build("PythonTask"): buildParameters =>
       import buildParameters.*
