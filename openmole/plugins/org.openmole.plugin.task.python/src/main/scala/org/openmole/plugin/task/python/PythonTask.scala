@@ -47,21 +47,22 @@ object PythonTask:
         )
 
   def apply(
-    script:                 RunnableScript,
-    arguments:              OptionalArgument[String] = None,
-    image:                  ContainerImage                     = "openmole/python:3.15.2",
-    libraries:              Seq[String]                        = Seq.empty,
-    install:                Seq[String]                        = Seq.empty,
-    prepare:                Seq[String]                        = Seq.empty,
-    hostFiles:              Seq[HostFile]                      = Vector.empty,
-    environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
-    errorOnReturnValue:     Boolean                            = true,
-    returnValue:            OptionalArgument[Val[Int]]         = None,
-    stdOut:                 OptionalArgument[Val[String]]      = None,
-    stdErr:                 OptionalArgument[Val[String]]      = None,
-    containerSystem:        OptionalArgument[ContainerSystem]  = None,
-    useUV:                  Boolean                            = true,
-    clearContainerCache:    Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
+             script:                 RunnableScript,
+             arguments:              OptionalArgument[String] = None,
+             image:                  ContainerImage                     = "openmole/python:3.15.2",
+             libraries:              Seq[String]                        = Seq.empty,
+             install:                Seq[String]                        = Seq.empty,
+             prepare:                Seq[String]                        = Seq.empty,
+             hostFiles:              Seq[HostFile]                      = Vector.empty,
+             environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
+             errorOnReturnValue:     Boolean                            = true,
+             executionDirectory:     OptionalArgument[String]           = None,
+             returnValue:            OptionalArgument[Val[Int]]         = None,
+             stdOut:                 OptionalArgument[Val[String]]      = None,
+             stdErr:                 OptionalArgument[Val[String]]      = None,
+             containerSystem:        OptionalArgument[ContainerSystem]  = None,
+             useUV:                  Boolean                            = true,
+             clearContainerCache:    Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
     ContainerTask.build("PythonTask"): buildParameters =>
       import buildParameters.*
@@ -81,16 +82,23 @@ object PythonTask:
           clearContainerCache = clearContainerCache
         )
 
-      def workDirectory = "/_workdirectory_"
-      
-      def scriptPath = s"$workDirectory/_generatescript_.py"
+      def containerWorkDirectory = "/_workdirectory_"
+
+      def scriptDirectory =
+        executionDirectory.option match
+          case Some(d) => s"$containerWorkDirectory/$d"
+          case None => containerWorkDirectory
+
+      def scriptPath = s"$scriptDirectory/_generatescript_.py"
       
       val argumentsValue = arguments.map(" " + _).getOrElse("")
 
+      def changeDirectory = executionDirectory.map(d => s"cd $scriptDirectory").toSeq
+
       ContainerTask.execution(
         image = containerImage,
-        command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
-        workDirectory = Some(workDirectory),
+        command = prepare ++ changeDirectory ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
+        workDirectory = Some(containerWorkDirectory),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         environmentVariables = environmentVariables,
@@ -130,9 +138,9 @@ object PythonTask:
       
           def inputArrayName = "_generateddata_"
       
-          def inputJSONPath = s"$workDirectory/_inputs_.json"
-      
-          def outputJSONPath = s"$workDirectory/_outputs_.json"
+          def inputJSONPath = s"$scriptDirectory/_inputs_.json"
+
+          def outputJSONPath = s"$scriptDirectory/_outputs_.json"
       
           def alignedUserCode =
             val source = RunnableScript.content(script)
