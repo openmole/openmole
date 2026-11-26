@@ -84,6 +84,7 @@ class TreeNodePanel:
       _.onFocus.mapTo(true) --> focused,
       _.onBlur.mapTo(false) --> focused,
       _.placeholder <-- directoryToggle.toggled.signal.map { d => if d then "New folder" else "New file" },
+      _.slots.end(child <-- focused.signal.map(f => if f then uploadButton else div())),
       _.onInput.mapToValue --> newNode,
       _.onKeyDown
         .filter(_.key == "Enter")
@@ -111,36 +112,47 @@ class TreeNodePanel:
   //Upload tool
   val transferring: Var[ProcessState] = Var(Processed())
 
-  def fInputMultiple(todo: Input => Unit) =
-    inputTag().amend(cls := "upload", `type` := "file", multiple := true, OMTags.webkitdirectory <-- directoryToggle.toggled.signal, inContext { thisNode => onChange --> { _ => todo(thisNode) } })
+  def uploadButton(using api: ServerAPI, basePath: BasePath, panels: Panels): HtmlElement =
+    val ipt: Input =
+      input(
+        `type` := "file",
+        display.none,
+        multiple := true,
+      )
 
-  def uploadButton(todo: Input => Unit): HtmlElement =
-    span(
-      idAttr := "uploadButton",
-      aria.hidden := true,
-      cls <-- directoryToggle.toggled.signal.map { d =>
-        if !d then "bi-cloud-upload" else "bi-cloud-upload-fill"
-      },
-      cls := "fileUpload glyphmenu", margin := "10 0 10 12", fInputMultiple(todo)
+    ipt.ref.addEventListener(
+      "change",
+      (e: org.scalajs.dom.Event) => {
+        val current = treeNodeManager.directory.now()
+
+        api.upload(
+          ipt.ref.files.toSeq.map { f =>
+            f -> (current / f.name)
+          },
+          (p: ProcessState) => transferring.set(p)
+        ).map { _ =>
+          ipt.ref.value = ""
+          plusFile.set(false)
+          refresh
+        }
+      }
     )
 
-  private def upButton(using api: ServerAPI, basePath: BasePath) = uploadButton((fileInput: Input) =>
-    val current = treeNodeManager.directory.now()
-    api.upload(
-      fileInput.ref.files.toSeq.map(f => f -> current / f.path),
-      (p: ProcessState) => transferring.set(p)
-    ).map { _ =>
-      fileInput.ref.value = ""
-      plusFile.set(false)
-      refresh
-    }
-  )
+    div(
+      ipt,
+      Icon(
+        _.name := "cloud-arrow-up",
+        _.cursor.pointer,
+        _.onClick --> { _ =>
+          ipt.ref.click()
+        }
+      )()
+    )
 
   def createFileTool(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     div(flexRow, alignItems.center, height := "70px", color.white,
       directoryToggle.element,
       newNodeInput,
-      upButton.amend(justifyContent.flexEnd),
       transferring.withTransferWaiter("white") {
         _ =>
           div()
@@ -524,7 +536,7 @@ class TreeNodePanel:
     val size = Var(100)
     lazy val tree: Div = div(
       cls := "file-scrollable-content",
-      overflow <-- openFileTree.signal.map(oft =>  if (oft) "auto" else "hidden"),
+      overflow <-- openFileTree.signal.map(oft => if (oft) "auto" else "hidden"),
       children <--
         (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMapSwitch { (currentDir, findString, foundFiles, multiTool, fileSorting, _, sizeValue) =>
           EventStream.fromFuture(
