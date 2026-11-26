@@ -23,28 +23,28 @@ import org.openmole.plugin.task.container
 object PythonTask:
   def dockerImage(version: String) = DockerImage("python", version)
 
-  def installCommands(install: Seq[String], libraries: Seq[String], major: Int, useUV: Boolean): Vector[String] =
-      if !useUV
-      then
-        // need to install pip2 in case of python 2
-        val effintsall =
-          install ++ (
+  def installCommands(install: Seq[String], libraries: Seq[String], major: Int, useUV: Boolean): Seq[String] =
+      install ++ (
+        if !useUV
+        then
+          // need to install pip2 in case of python 2
+          val effintsall =
             if major == 2
             then Seq("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py","python2 get-pip.py")
             else Seq.empty
-          )
 
-        val pipValue = s"""pip$major install --prefer-binary"""
+          val pipValue = s"""pip$major install --prefer-binary"""
 
-        if libraries.isEmpty
-        then effintsall.toVector
-        else (effintsall ++ Seq(s"$pipValue ${libraries.mkString(" ")}")).toVector
-      else
-        val uvValue = s"""uv pip install"""
+          if libraries.isEmpty
+          then effintsall
+          else (effintsall ++ Seq(s"$pipValue ${libraries.mkString(" ")}"))
+        else
+          val uvValue = s"""uv pip install --system"""
 
-        if libraries.isEmpty
-        then Vector.empty
-        else Vector(s"$uvValue ${libraries.mkString(" ")}")
+          if libraries.isEmpty
+          then Seq()
+          else Seq(s"$uvValue ${libraries.mkString(" ")}")
+        )
 
   def apply(
     script:                 RunnableScript,
