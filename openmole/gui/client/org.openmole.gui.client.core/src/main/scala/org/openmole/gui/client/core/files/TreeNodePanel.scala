@@ -131,6 +131,7 @@ class TreeNodePanel:
       (p: ProcessState) => transferring.set(p)
     ).map { _ =>
       fileInput.ref.value = ""
+      plusFile.set(false)
       refresh
     }
   )
