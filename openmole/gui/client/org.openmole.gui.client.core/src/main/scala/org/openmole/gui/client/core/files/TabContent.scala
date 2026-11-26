@@ -117,10 +117,11 @@ class TabContent:
                                                           api: ServerAPI,
                                                           basePath: BasePath) =
     // FIXME
-//    tabIndex(safePath).foreach: ind =>
-//      tabs.update(ts =>
-//        ts.updated(ind, ts(ind).editorPanelUI.map(epu => EditorPanelUI(safePath, content, epu.contentHash)))
-//      )
+    //    tabIndex(safePath).foreach: ind =>
+    //      tabs.update(ts =>
+    //        ts.updated(ind, ts(ind).editorPanelUI.map(epu => EditorPanelUI(safePath, content, epu.contentHash)))
+    //      )
+    ()
 
   def tab(safePath: SafePath) =
     tabs.now().find { tab => tab.safePath == safePath }
